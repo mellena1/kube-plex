@@ -22,7 +22,9 @@ The following tables lists the configurable parameters of the Plex chart and the
 | `service.annotations`   | Service annotations for the Plex GUI | `{}` |
 | `service.labels`        | Custom labels | `{}` |
 | `service.loadBalancerIP` | Loadbalance IP for the Plex GUI | `{}` |
-| `service.loadBalancerSourceRanges` | List of IP CIDRs allowed access to load balancer (if supported)      | None
+| `readinessProbe` | All readiness probe options for the Plex Media Server      | See Values.yaml |
+| `livenessProbe` | All liveness probe options for the Plex Media Server      | See Values.yaml |
+| `service.loadBalancerIP` | Loadbalance IP for the Plex GUI | `{}` |
 | `ingress.enabled`              | Enables Ingress | `false` |
 | `ingress.annotations`          | Ingress annotations | `{}` |
 | `ingress.labels`               | Custom labels                       | `{}`
