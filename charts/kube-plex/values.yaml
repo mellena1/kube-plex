@@ -59,6 +59,20 @@ ingress:
     #   hosts:
     #     - chart-example.local
 
+# Probes for the plex media server
+readinessProbe:
+  httpGet:
+    path: /identity
+    port: 32400
+  initialDelaySeconds: 15
+  timeoutSeconds: 5
+livenessProbe:
+  httpGet:
+    path: /identity
+    port: 32400
+  initialDelaySeconds: 10
+  timeoutSeconds: 10
+
 rbac:
   create: true
   # Specify create: false and serviceAccountName to manually manage the service
