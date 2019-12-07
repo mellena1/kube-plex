@@ -1,0 +1,16 @@
+kind: pipeline
+name: default
+
+steps:
+- name: Build-image-and-push
+  image: plugins/docker
+  settings:
+    repo: mellena1/kube-plex
+    auto_tag: true
+    username: mellena1
+    password:
+      from_secret: password
+
+trigger:
+  branch:
+  - master
