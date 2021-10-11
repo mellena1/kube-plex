@@ -7,8 +7,15 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+  {{- if .Values.deploymentAnnotations }}
+  annotations:
+    {{- range $key, $value := .Values.deploymentAnnotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
 spec:
   replicas: 1
+  revisionHistoryLimit: 3
   strategy:
     type: Recreate
   selector:
@@ -119,6 +126,20 @@ spec:
 {{- else }}
           value: "{{ template "fullname" . }}-config"
 {{- end }}
+{{- if .Values.proxy.enable }}
+  {{- if .Values.proxy.http }}
+        - name: "HTTP_PROXY"
+          value: "{{.Values.proxy.http}}"
+  {{- end }}
+  {{- if .Values.proxy.https }}
+        - name: "HTTPS_PROXY"
+          value: "{{.Values.proxy.https}}"
+  {{- end }}
+  {{- if .Values.proxy.noproxy }}
+        - name: "NO_PROXY"
+          value: "{{.Values.proxy.noproxy}}"
+  {{- end }}
+{{- end }}
         volumeMounts:
         - name: data
           mountPath: /data
@@ -135,6 +156,10 @@ spec:
         {{- if .Values.persistence.transcode.subPath }}
           subPath: {{ .Values.persistence.transcode.subPath }}
         {{ end }}
+        {{-  range .Values.persistence.extraData }}
+        - mountPath: "/data-{{ .name }}"
+          name: "extradata-{{ .name }}"
+        {{- end }}
         - name: shared
           mountPath: /shared
         resources:
@@ -169,5 +194,22 @@ spec:
 {{- else }}
         emptyDir: {}
 {{- end }}
+{{-  range .Values.persistence.extraData }}
+      - name: "extradata-{{ .name }}"
+        persistentVolumeClaim:
+{{- if .claimName }}
+          claimName: "{{ .claimName }}"
+{{- else }}
+          claimName: "extradata-{{ .name }}"
+{{- end }}
+{{- end }}
       - name: shared
         emptyDir: {}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
