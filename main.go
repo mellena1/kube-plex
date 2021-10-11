@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/munnerz/kube-plex/pkg/signals"
+	"golang.org/x/net/context"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -58,7 +59,9 @@ func main() {
 		log.Fatalf("Error building kubernetes clientset: %s", err)
 	}
 
-	pod, err = kubeClient.CoreV1().Pods(namespace).Create(pod)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	pod, err = kubeClient.CoreV1().Pods(namespace).Create(ctx, pod, metav1.CreateOptions{})
 	if err != nil {
 		log.Fatalf("Error creating pod: %s", err)
 	}
@@ -82,7 +85,9 @@ func main() {
 	}
 
 	log.Printf("Cleaning up pod...")
-	err = kubeClient.CoreV1().Pods(namespace).Delete(pod.Name, nil)
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+	err = kubeClient.CoreV1().Pods(namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{})
 	if err != nil {
 		log.Fatalf("Error cleaning up pod: %s", err)
 	}
@@ -213,7 +218,9 @@ func toCoreV1EnvVar(in []string) []corev1.EnvVar {
 
 func waitForPodCompletion(cl kubernetes.Interface, pod *corev1.Pod) error {
 	for {
-		pod, err := cl.CoreV1().Pods(pod.Namespace).Get(pod.Name, metav1.GetOptions{})
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		defer cancel()
+		pod, err := cl.CoreV1().Pods(pod.Namespace).Get(ctx, pod.Name, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
