@@ -19,7 +19,7 @@ claimToken:
   secret:
   secretKey: claimToken
   ## only specify value if you are passing in the plain text claimToken
-  value:
+  value: ''
 
 # Set the timezone of the plex server
 timezone: Europe/London
