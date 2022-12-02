@@ -53,21 +53,27 @@ spec:
       - name: plex
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-{{- if .Values.kubePlex.enabled }}
-        # We replace the PMS binary with a postStart hook to save having to
-        # modify the default image entrypoint.
         lifecycle:
           postStart:
             exec:
               command:
-              - bash
-              - -c
-              - |
-                #!/bin/bash
-                set -e
-                rm -f '/usr/lib/plexmediaserver/Plex Transcoder'
-                cp /shared/kube-plex '/usr/lib/plexmediaserver/Plex Transcoder'
-{{- end }}
+                - bash
+                - -c
+                - |
+                  #!/bin/bash
+                  set -e
+
+                  {{- if .Values.kubePlex.enabled }}
+                  # We replace the PMS binary with a postStart hook to save having to
+                  # modify the default image entrypoint.
+                  rm -f '/usr/lib/plexmediaserver/Plex Transcoder'
+                  cp /shared/kube-plex '/usr/lib/plexmediaserver/Plex Transcoder'
+                  {{- end }}
+
+                  {{- if .Values.profileConfigMap }}
+                  # Copy extra profiles to profiles directory
+                  cp /extra-profiles/* /usr/lib/plexmediaserver/Resources/Profiles/
+                  {{- end }}
         readinessProbe:
           httpGet:
             path: /identity
@@ -160,6 +166,10 @@ spec:
         - mountPath: "/data-{{ .name }}"
           name: "extradata-{{ .name }}"
         {{- end }}
+        {{- if .Values.profileConfigMap }}
+        - mountPath: /extra-profiles
+          name: profiles
+        {{- end }}
         - name: shared
           mountPath: /shared
         resources:
@@ -202,6 +212,11 @@ spec:
 {{- else }}
           claimName: "extradata-{{ .name }}"
 {{- end }}
+{{- end }}
+{{- if .Values.profileConfigMap }}
+      - name: profiles
+        configMap:
+          name: "{{ .Values.profileConfigMap }}"
 {{- end }}
       - name: shared
         emptyDir: {}
