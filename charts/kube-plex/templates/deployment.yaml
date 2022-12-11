@@ -146,6 +146,12 @@ spec:
           value: "{{.Values.proxy.noproxy}}"
   {{- end }}
 {{- end }}
+{{- if .Values.extraEnv }}
+  {{- range $key, $val := .Values.extraEnv }}
+        - name: {{ $key | quote }}
+          value: {{ $val | quote }}
+  {{- end }}
+{{- end }}
         volumeMounts:
         - name: data
           mountPath: /data

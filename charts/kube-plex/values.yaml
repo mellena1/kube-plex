@@ -68,6 +68,8 @@ rbac:
 nodeSelector:
   beta.kubernetes.io/arch: amd64
 
+extraEnv: {}
+
 persistence:
   transcode:
     # Optionally specify claimName to manually override the PVC to be used for
