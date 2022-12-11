@@ -52,10 +52,6 @@ spec:
       containers:
       - name: plex
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-{{- if .Values.nvidia.install }}
-        command: ["/bin/sh", "-c"]
-        args: ["apt update && apt install -y nvidia-headless-{{ .Values.nvidia.version }} && /init"]
-{{- end }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         lifecycle:
           postStart:
