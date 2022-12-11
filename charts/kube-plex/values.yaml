@@ -70,6 +70,10 @@ nodeSelector:
 
 extraEnv: {}
 
+nvidia:
+  install: false
+  version: 525
+
 persistence:
   transcode:
     # Optionally specify claimName to manually override the PVC to be used for
