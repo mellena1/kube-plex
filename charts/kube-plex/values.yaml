@@ -47,6 +47,8 @@ service:
 
 ingress:
   enabled: false
+  # Ingress class name (for Kubernetes >= 1.18)
+  className: ""
   # Used to create an Ingress record.
   hosts:
     - chart-example.local
